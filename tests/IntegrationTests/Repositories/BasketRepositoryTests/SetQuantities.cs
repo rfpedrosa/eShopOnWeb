@@ -11,7 +11,7 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories.BasketRepositoryTests
     public class SetQuantities : BaseEfRepoTestFixture
     {
         private readonly IAsyncRepository<Basket> _basketRepository;
-        private readonly BasketBuilder BasketBuilder = new BasketBuilder();
+        private readonly BasketBuilder _basketBuilder = new();
 
         public SetQuantities()
         {
@@ -21,11 +21,11 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories.BasketRepositoryTests
         [Fact]
         public async Task RemoveEmptyQuantities()
         {
-            var basket = BasketBuilder.WithOneBasketItem();
+            var basket = _basketBuilder.WithOneBasketItem();
             var basketService = new BasketService(_basketRepository, null);
             await _basketRepository.AddAsync(basket);
 
-            await basketService.SetQuantities(BasketBuilder.BasketId, new Dictionary<string, int>() { { BasketBuilder.BasketId.ToString(), 0 } });
+            await basketService.SetQuantities(_basketBuilder.BasketId, new Dictionary<string, int> { { _basketBuilder.BasketId.ToString(), 0 } });
 
             Assert.Equal(0, basket.Items.Count);
         }

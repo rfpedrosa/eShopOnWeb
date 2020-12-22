@@ -11,23 +11,23 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
     // and https://www.davepaquette.com/archive/2016/11/27/integration-testing-with-entity-framework-core-and-sql-server.aspx
     public abstract class BaseEfRepoTestFixture : IDisposable
     {
-        private readonly CatalogContext _catalogContext;
+        protected CatalogContext CatalogContext { get; private set; }
 
         protected BaseEfRepoTestFixture()
         {
             var dbOptions = CreateNewContextOptions(GetType().Name);
 
-            _catalogContext = new CatalogContext(dbOptions);
+            CatalogContext = new CatalogContext(dbOptions);
 
             // EnsureCreated totally bypasses migrations and just creates the schema for you, you can't mix this with migrations.
             // EnsureCreated is designed for testing or rapid prototyping where you are ok with dropping and re-creating the database each time.
             // If you are using migrations and want to have them automatically applied on app start, then you can use context.Database.Migrate() instead.
-            _catalogContext.Database.EnsureCreated();
+            CatalogContext.Database.EnsureCreated();
         }
 
         public void Dispose()
         {
-            _catalogContext.Database.EnsureDeleted();
+            CatalogContext.Database.EnsureDeleted();
         }
 
         private static DbContextOptions<CatalogContext> CreateNewContextOptions(string testName)
@@ -54,7 +54,7 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
         protected IAsyncRepository<T> GetRepository<T>() 
             where T : BaseEntity, IAggregateRoot
         {
-            return new EfRepository<T>(_catalogContext);
+            return new EfRepository<T>(CatalogContext);
         }
     }
 }

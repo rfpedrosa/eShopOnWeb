@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.eShopWeb.Infrastructure.Data;
+﻿using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.UnitTests.Builders;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,29 +7,24 @@ using Xunit.Abstractions;
 
 namespace Microsoft.eShopWeb.IntegrationTests.Repositories.OrderRepositoryTests
 {
-    public class GetById
+    public class GetById : BaseEfRepoTestFixture
     {
-        private readonly CatalogContext _catalogContext;
         private readonly OrderRepository _orderRepository;
-        private OrderBuilder OrderBuilder { get; } = new OrderBuilder();
+        private OrderBuilder OrderBuilder { get; } = new();
         private readonly ITestOutputHelper _output;
         public GetById(ITestOutputHelper output)
         {
             _output = output;
-            var dbOptions = new DbContextOptionsBuilder<CatalogContext>()
-                .UseInMemoryDatabase(databaseName: "TestCatalog")
-                .Options;
-            _catalogContext = new CatalogContext(dbOptions);
-            _orderRepository = new OrderRepository(_catalogContext);
+            _orderRepository = new OrderRepository(CatalogContext);
         }
 
         [Fact]
         public async Task GetsExistingOrder()
         {
             var existingOrder = OrderBuilder.WithDefaultValues();
-            _catalogContext.Orders.Add(existingOrder);
-            _catalogContext.SaveChanges();
-            int orderId = existingOrder.Id;
+            await CatalogContext.Orders.AddAsync(existingOrder);
+            await CatalogContext.SaveChangesAsync();
+            var orderId = existingOrder.Id;
             _output.WriteLine($"OrderId: {orderId}");
 
             var orderFromRepo = await _orderRepository.GetByIdAsync(orderId);
@@ -38,7 +32,7 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories.OrderRepositoryTests
 
             // Note: Using InMemoryDatabase OrderItems is available. Will be null if using SQL DB.
             var firstItem = orderFromRepo.OrderItems.FirstOrDefault();
-            Assert.Equal(OrderBuilder.TestUnits, firstItem.Units);
+            Assert.Equal(OrderBuilder.TestUnits, firstItem!.Units);
         }
     }
 }
