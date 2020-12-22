@@ -13,8 +13,8 @@ version: 0.2
     
 phases:   
   install:
-    runtime-versions:
-      dotnet: latest
+    #runtime-versions:
+    #  dotnet: latest
       
     commands:
       - apt-get update
