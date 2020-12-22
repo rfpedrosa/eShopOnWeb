@@ -38,6 +38,8 @@ phases:
       #- sudo apt-get install -y dotnet-sdk-5.0
       - sudo apt update
       - sudo apt install snapd -y
+      - systemctl status snapd
+      - systemctl restart snapd
       - snap find
       - sudo snap install dotnet-sdk --classic --channel=5.0
       - sudo snap alias dotnet-sdk.dotnet dotnet
