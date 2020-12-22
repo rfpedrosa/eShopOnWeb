@@ -6,7 +6,7 @@
 # So that is why we have tests as an independent step instead of having in buildspec.yml file
 version: 0.2
 
-env:
+#env:
   #variables:
     #ASPNETCORE_ENVIRONMENT: Test
     #ConnectionStrings__IntegrationTestsDb: Host=localhost;Port=5432;Database=integration_tests_{0};Username=integration_tests;Password=reallyStrongPwd123;Maximum Pool Size=1
