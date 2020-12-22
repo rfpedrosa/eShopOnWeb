@@ -1,6 +1,4 @@
-# Based on https://github.com/PrakashTrove/AWS-CodeBuild-NetCore/blob/master/buildspec.yml
-# AWS CodeBuild spec to build an Elastic Beanstalk artifact for AWS CodePipeline to deploy
-# From https://stackoverflow.com/questions/46584324/code-build-continues-after-build-fails:
+# AWS CodeBuild buildspec file to run in a [mcr.microsoft.com/dotnet/sdk:5.0.101-focal](https://hub.docker.com/_/microsoft-dotnet-sdk) image
 # "POST_BUILD will always run as long as BUILD was also run (regardless of BUILD's success or failure.)
 # The same goes for UPLOAD_ARTIFACTS. This is so you can retrieve debug information/artifacts."
 # So that is why we have tests as an independent step instead of having in buildspec.yml file
@@ -20,29 +18,18 @@ phases:
       - apt-get update
       - apt-get install sudo -y
       # https://www.postgresql.org/download/linux/ubuntu/
-      # Create the file repository configuration:
-      #- sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-      # Import the repository signing key:
-      # - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-      #- apt-get update
       # Install the latest version of PostgreSQL.
       # If you want a specific version, use 'postgresql-12' or similar instead of 'postgresql':
       - apt-get -y install postgresql
-      # Temporary: At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
-      # At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
-      #- wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-      #-  sudo dpkg -i packages-microsoft-prod.deb
-      #- sudo apt-get update
-      #- sudo apt-get install -y apt-transport-https
-      #- sudo apt-get update
-      #- sudo apt-get install -y dotnet-sdk-5.0
+      
+  pre_build:
+    commands:
+      # some debug info about dotnet installed sdk
       - dotnet --list-runtimes
       - dotnet --list-sdks
       - dotnet --version
       - dotnet --info
-      
-  pre_build:
-    commands:
+      # Start postgresql DB
       # https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e
       - service postgresql start
       - service postgresql status
@@ -55,5 +42,4 @@ phases:
   build:
     commands:
       - echo integration tests on `date`
-      - pwd
       - dotnet test IntegrationTests.csproj --blame --logger "console;verbosity=detailed"
