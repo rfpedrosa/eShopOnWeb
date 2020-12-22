@@ -38,9 +38,10 @@ phases:
       #- sudo apt-get install -y dotnet-sdk-5.0
       - sudo apt update
       - sudo apt install snapd -y
-      - systemctl status snapd
-      - systemctl restart snapd
-      - snap find
+      - sudo apt-get update && sudo apt-get install -yqq daemonize dbus-user-session fontconfig
+      - sudo daemonize /usr/bin/unshare --fork --pid --mount-proc /lib/systemd/systemd --system-unit=basic.target
+      - exec sudo nsenter -t $(pidof systemd) -a su - $LOGNAME
+      - snap version
       - sudo snap install dotnet-sdk --classic --channel=5.0
       - sudo snap alias dotnet-sdk.dotnet dotnet
       - dotnet --list-sdks
