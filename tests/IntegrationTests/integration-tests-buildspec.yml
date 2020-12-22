@@ -30,13 +30,13 @@ phases:
       #- apt-get -y install postgresql
       # Temporary: At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
       # At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
-      - wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-      - sudo dpkg -i packages-microsoft-prod.deb
-      - sudo apt-get update
-      - sudo apt-get install -y apt-transport-https
-      - sudo apt-get update
-      - sudo apt-get install -y dotnet-sdk-5.0
-      - sudo ln -s /usr/share/dotnet/dotnet /usr/local/bin/dotnet
+      #- wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+      #-  sudo dpkg -i packages-microsoft-prod.deb
+      #- sudo apt-get update
+      #- sudo apt-get install -y apt-transport-https
+      #- sudo apt-get update
+      #- sudo apt-get install -y dotnet-sdk-5.0
+      - dotnet --list-runtimes
       - dotnet --list-sdks
       - dotnet --version
       - dotnet --info
