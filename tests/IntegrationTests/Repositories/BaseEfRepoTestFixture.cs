@@ -1,11 +1,8 @@
 using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Data;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.eShopWeb.IntegrationTests.Repositories
@@ -14,14 +11,7 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
     // and https://www.davepaquette.com/archive/2016/11/27/integration-testing-with-entity-framework-core-and-sql-server.aspx
     public abstract class BaseEfRepoTestFixture : IDisposable
     {
-        private static readonly IConfigurationRoot Configuration;
-
         private readonly CatalogContext _catalogContext;
-
-        static BaseEfRepoTestFixture()
-        {
-            Configuration = BuildConfig();
-        }
 
         protected BaseEfRepoTestFixture()
         {
@@ -59,24 +49,6 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
                 .UseSnakeCaseNamingConvention(); // https://www.npgsql.org/efcore/modeling/table-column-naming.html
 
             return builder.Options;
-        }
-
-        private static IConfigurationRoot BuildConfig()
-        {
-            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
-                .AddJsonFile("appsettings.json", true, reloadOnChange: false);
-
-            if (environmentName != null)
-            {
-                config.AddJsonFile($"appsettings.{environmentName}.json", true, reloadOnChange: false);
-            }
-
-            config.AddEnvironmentVariables();
-
-            return config.Build();
         }
 
         protected IAsyncRepository<T> GetRepository<T>() 
