@@ -36,7 +36,8 @@ phases:
       #- sudo apt-get install -y apt-transport-https
       #- sudo apt-get update
       #- sudo apt-get install -y dotnet-sdk-5.0
-      - apt-get install snap -y
+      - sudo apt-get install snap -y
+      - sudo apt-get update
       - sudo snap install dotnet-sdk --classic --channel=5.0
       - sudo snap alias dotnet-sdk.dotnet dotnet
       - dotnet --list-sdks
