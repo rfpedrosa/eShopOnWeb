@@ -21,13 +21,13 @@ phases:
       - apt-get install sudo -y
       # https://www.postgresql.org/download/linux/ubuntu/
       # Create the file repository configuration:
-      #- sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+      - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
       # Import the repository signing key:
-      #- wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-      #- apt-get update
+      - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      - apt-get update
       # Install the latest version of PostgreSQL.
       # If you want a specific version, use 'postgresql-12' or similar instead of 'postgresql':
-      #- apt-get -y install postgresql
+      - apt-get -y install postgresql
       # Temporary: At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
       # At the time I'm writing, AWS CodeBuild does not support .NET 5 as a runtime so I had to install manually but support will come soon.
       #- wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -44,10 +44,10 @@ phases:
   pre_build:
     commands:
       # https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e
-      #- service postgresql start
-      #- service postgresql status
-      #- sudo -u postgres psql -c "SELECT version();"
-      #- sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'reallyStrongPwd123';"
+      - service postgresql start
+      - service postgresql status
+      - sudo -u postgres psql -c "SELECT version();"
+      - sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'reallyStrongPwd123';"
       #- sudo su - postgres -c "createuser integration_tests --superuser"
       #- sudo -u postgres psql -c "ALTER USER integration_tests PASSWORD 'reallyStrongPwd123';"
       - cd tests/IntegrationTests
