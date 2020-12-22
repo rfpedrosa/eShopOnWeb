@@ -52,7 +52,7 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
 
             // Create a new options instance telling the context to use an
             // Npgsql database and the new service provider.
-            var postgresConnectionString = string.Format(Configuration.GetConnectionString("IntegrationTestsDb"), dbSuffix);
+            var postgresConnectionString = $"Host=localhost;Port=5432;Database=integration_tests_{dbSuffix};Username=postgres;Password=reallyStrongPwd123;Maximum Pool Size=1";
             var builder = new DbContextOptionsBuilder<CatalogContext>();
             builder.UseNpgsql(postgresConnectionString)
                 .UseInternalServiceProvider(serviceProvider)

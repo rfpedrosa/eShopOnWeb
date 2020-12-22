@@ -1,0 +1,46 @@
+# Based on https://github.com/PrakashTrove/AWS-CodeBuild-NetCore/blob/master/buildspec.yml
+# AWS CodeBuild spec to build an Elastic Beanstalk artifact for AWS CodePipeline to deploy
+# From https://stackoverflow.com/questions/46584324/code-build-continues-after-build-fails:
+# "POST_BUILD will always run as long as BUILD was also run (regardless of BUILD's success or failure.)
+# The same goes for UPLOAD_ARTIFACTS. This is so you can retrieve debug information/artifacts."
+# So that is why we have tests as an independent step instead of having in buildspec.yml file
+version: 0.2
+
+env:
+  #variables:
+    #ASPNETCORE_ENVIRONMENT: Test
+    #ConnectionStrings__IntegrationTestsDb: Host=localhost;Port=5432;Database=integration_tests_{0};Username=integration_tests;Password=reallyStrongPwd123;Maximum Pool Size=1
+    
+phases:   
+  install:
+    runtime-versions:
+      dotnet: latest
+      
+    commands:
+      - apt-get update
+      - apt-get install sudo -y
+      # https://www.postgresql.org/download/linux/ubuntu/
+      # Create the file repository configuration:
+      - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+      # Import the repository signing key:
+      - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+      - apt-get update
+      # Install the latest version of PostgreSQL.
+      # If you want a specific version, use 'postgresql-12' or similar instead of 'postgresql':
+      - apt-get -y install postgresql
+      
+  pre_build:
+    commands:
+      # https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e
+      - service postgresql start
+      - service postgresql status
+      - sudo -u postgres psql -c "SELECT version();"
+      - sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'reallyStrongPwd123';"
+      #- sudo su - postgres -c "createuser integration_tests --superuser"
+      #- sudo -u postgres psql -c "ALTER USER integration_tests PASSWORD 'reallyStrongPwd123';"
+      - cd tests/IntegrationTests
+      
+  build:
+    commands:
+      - echo integration tests on `date`
+      - dotnet test IntegrationTests.csproj --blame --logger "console;verbosity=detailed"
