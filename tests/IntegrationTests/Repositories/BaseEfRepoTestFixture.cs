@@ -1,8 +1,11 @@
 using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.Infrastructure.Data;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.eShopWeb.IntegrationTests.Repositories
@@ -11,7 +14,12 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
     // and https://www.davepaquette.com/archive/2016/11/27/integration-testing-with-entity-framework-core-and-sql-server.aspx
     public abstract class BaseEfRepoTestFixture : IDisposable
     {
-        protected CatalogContext CatalogContext { get; private set; }
+        private static readonly IConfigurationRoot Configuration;
+        
+        static BaseEfRepoTestFixture()
+        {
+            Configuration = BuildConfig();
+        }
 
         protected BaseEfRepoTestFixture()
         {
@@ -29,7 +37,27 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
         {
             CatalogContext.Database.EnsureDeleted();
         }
+        
+        protected CatalogContext CatalogContext { get; private set; }
 
+        private static IConfigurationRoot BuildConfig()
+        {
+            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
+                .AddJsonFile("appsettings.json", true, reloadOnChange: false);
+
+            if (environmentName != null)
+            {
+                config.AddJsonFile($"appsettings.{environmentName}.json", true, reloadOnChange: false);
+            }
+
+            config.AddEnvironmentVariables();
+
+            return config.Build();
+        }
+        
         private static DbContextOptions<CatalogContext> CreateNewContextOptions(string testName)
         {
             var dbSuffix = $"{testName}_{Guid.NewGuid()}";
@@ -42,7 +70,8 @@ namespace Microsoft.eShopWeb.IntegrationTests.Repositories
 
             // Create a new options instance telling the context to use an
             // Npgsql database and the new service provider.
-            var postgresConnectionString = $"Host=localhost;Port=5432;Database=integration_tests_{dbSuffix};Username=postgres;Password=reallyStrongPwd123;Maximum Pool Size=1";
+            // var postgresConnectionString = $"Host=localhost;Port=5432;Database=integration_tests_{dbSuffix};Username=postgres;Password=reallyStrongPwd123;Maximum Pool Size=1";
+            var postgresConnectionString = string.Format(Configuration.GetConnectionString("IntegrationTestsDb"), dbSuffix);
             var builder = new DbContextOptionsBuilder<CatalogContext>();
             builder.UseNpgsql(postgresConnectionString)
                 .UseInternalServiceProvider(serviceProvider)
